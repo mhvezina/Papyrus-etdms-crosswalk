@@ -131,10 +131,18 @@ Par ex. ceci est le cas des theses des collections retrospectives -->
 				</dc:description>
 			</xsl:for-each>
 
+<!-- Nouveauté 2019-2020 : BAC-LAC demande une chaine de caractères standardisées pour l'élément publisher. Je crois deviner
+que ceci remplace le Theses Canada Number de la forme TC-QMU-.... Donc plutôt que de prendre la valeur de l'élément degree.grantor, qui porte parfois la nom de l'université suivi de celui de la faculté,
+je (MHV) vais standardiser une valeur -->
+
+<!--
 			<dc:publisher country="Canada">
 				<xsl:value-of select="$thesis/doc:element[@name = 'degree']/doc:element[@name = 'grantor']/doc:element/doc:field[@name = 'value']"/>
 			</dc:publisher>
-
+-->
+			
+			<dc:publisher country="Canada">Université de Montréal</dc:publisher>			
+			
 			<xsl:for-each
 				select="$dc/doc:element[@name = 'contributor']/doc:element[@name = 'advisor']/doc:element/doc:field[@name = 'value']">
 				<dc:contributor>
@@ -193,6 +201,10 @@ the resource. The string "Electronic Thesis or Dissertation" is recommended as o
 				</dc:type>
 			</xsl:for-each>
 
+			<!-- Nouveauté 2019-2020 : Nouvelle exigence de BAC-LAC : l'élément identifier doit comporter l’URL
+				des versions intégrales des documents dans le dépôt et, facultativement, de la notice du dépôt.
+				Aucune espace n’est autorisée dans les URL. Les autres types d’identificateur ne seront pas téléchargés -->
+
 			<xsl:for-each
 				select="$dc/doc:element[@name = 'identifier']/doc:element/doc:element/doc:field[@name = 'value']">
 				<dc:identifier>
@@ -202,20 +214,20 @@ the resource. The string "Electronic Thesis or Dissertation" is recommended as o
 
 			<xsl:if test="$TME = 'true'">
 			<xsl:for-each select="$bundles/doc:element[@name = 'bundle' and doc:field = 'ORIGINAL']/doc:element[@name = 'bitstreams']/doc:element[@name = 'bitstream']/doc:field[@name = 'url']">
-				<!-- url du bitstream dans papyrus ; encore dmandé par LAC? -->
+				<!-- url du bitstream dans papyrus ; encore demandé par BAC-LAC. Nouveauté 2019-2020 : BAC-LAC va maintenant récolter tous les fichiers de la thèse -->
 				<dc:identifier>
 					<xsl:value-of select="."/>
 				</dc:identifier>
 			</xsl:for-each>
 			
-
-		<!-- Ça va être toujours la chaîne à partir de la position 27, : http://hdl.handle.net/1973/10165 -->
-				<dc:identifier scheme="Theses Canada Number">TC-QMU-<xsl:value-of select="substring($dc/doc:element[@name = 'identifier']/doc:element/doc:element/doc:field[@name = 'value' and contains(., 'hdl.handle.net')], 28)"/></dc:identifier>
+		<!-- Nouveauté 2019-2020 : BAC-LAC ne semble plus exiger cet élément donc je (MHV) le retire -->
+		   <!-- Ça va être toujours la chaîne à partir de la position 27, : http://hdl.handle.net/1973/10165 -->
+		   <!-- <dc:identifier scheme="Theses Canada Number">TC-QMU-<xsl:value-of select="substring($dc/doc:element[@name = 'identifier']/doc:element/doc:element/doc:field[@name = 'value' and contains(., 'hdl.handle.net')], 28)"/></dc:identifier> -->
 
 			</xsl:if>
 
 
-
+	<!-- Nouveauté 2019-2020 : BAC-LAC ne demande plus cet élément mais je le conserve pour compatibilité ETDMS -->
 		<!-- nombre de formats contenu ds ORIGINAL -->
 		<xsl:variable name="nombreFormats"
 			select="count($bundles/doc:element[@name = 'bundle']/doc:field[@name = 'name' and text() = 'ORIGINAL']/./../doc:element[@name = 'bitstreams']/doc:element[@name = 'bitstream' and doc:field[@name = 'format']])"/>
@@ -268,7 +280,18 @@ the resource. The string "Electronic Thesis or Dissertation" is recommended as o
 			</xsl:for-each>
 -->
 
-<!--
+
+<!-- Nouveauté 2019-2020 : La norme ETDMS 1.1 indique une valeur numérique pour l'accès au document mais BAC-LAC donne encore
+		la définition de dc.rights de ETDMS 1.0 pour ses nouvelles exigences. Je vais donc ajuster en conséquence et mettre une mention de droits a l'auteur.e -->
+	<!-- etdms 1.1 : Information about rights
+            held in and over the resource. Typically, this
+            describes the conditions under which the work may be
+            distributed, reproduced, etc., how these conditions may
+            change over time, and whom to contact regarding the
+            copyright of the work.<br><br><strong>Three levels are valid:<br><br></strong>
+           <ul><li>0 Not publicly accessible</li><li>1 Limited public access</li><li>2 Publicly accessible</li></ul> -->
+	<!-- <dc:rights>2</dc:rights> -->
+
 	<dc:rights>
 			<xsl:variable name="auteur">
 				<xsl:call-template name="obtenirNomAuteur">
@@ -280,17 +303,9 @@ the resource. The string "Electronic Thesis or Dissertation" is recommended as o
 						select="substring($laDate, 0, 5)"/>
 				<xsl:value-of select="concat('© ', $auteur, ', ', $annee)"/>
 	</dc:rights>
--->
 
-<!-- etdms 1.1 : Information about rights
-            held in and over the resource. Typically, this
-            describes the conditions under which the work may be
-            distributed, reproduced, etc., how these conditions may
-            change over time, and whom to contact regarding the
-            copyright of the work.<br><br><strong>Three levels are valid:<br><br></strong>
-<ul><li>0 Not publicly accessible</li><li>1 Limited public access</li><li>2 Publicly accessible</li></ul> -->
 
-	<dc:rights>2</dc:rights>
+
 
 
 			<degree>
