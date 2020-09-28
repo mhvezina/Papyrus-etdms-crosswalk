@@ -53,7 +53,8 @@ Par ex. ceci est le cas des theses des collections retrospectives -->
 
 
 
-
+<!-- MHV Fevrier 2020 : À la demande de BAC-LAC :Je change la localisation des schemas de "http://www.ndltd.org/standards/metadata/etdms/1-1/etdms11.xsd" à "http://www.ndltd.org/standards/metadata/etdms/1.1/etdms11.xsd" 
+  Ceci causera une erreur de validation à coup sûr mais accomodera BAC-LAC. Voir ce fil de discussion au besoin : https://www.google.com/search?q=ndltd+1.1+1-1+problem&rlz=1C1GCEU_frCA880CA880&oq=ndltd+1.1+1-1+problem+&aqs=chrome..69i57j33.11767j0j7&sourceid=chrome&ie=UTF-8 -->
 
 	<xsl:template match="/">
 		<thesis xmlns="http://www.ndltd.org/standards/metadata/etdms/1.1/"
@@ -61,11 +62,11 @@ Par ex. ceci est le cas des theses des collections retrospectives -->
 			xmlns:dc="http://purl.org/dc/elements/1.1/"
 			xmlns:dcterms="http://purl.org/dc/terms/"
 			xsi:schemaLocation="http://www.ndltd.org/standards/metadata/etdms/1.1/
-			http://www.ndltd.org/standards/metadata/etdms/1-1/etdms11.xsd
+			http://www.ndltd.org/standards/metadata/etdms/1.1/etdms11.xsd
 			http://purl.org/dc/elements/1.1/
-			http://www.ndltd.org/standards/metadata/etdms/1-1/etdmsdc.xsd
+			http://www.ndltd.org/standards/metadata/etdms/1.1/etdmsdc.xsd
 			http://purl.org/dc/terms/
-			http://www.ndltd.org/standards/metadata/etdms/1-1/etdmsdcterms.xsd"
+			http://www.ndltd.org/standards/metadata/etdms/1.1/etdmsdcterms.xsd"
 		>
 
 
@@ -152,7 +153,7 @@ je (MHV) vais standardiser une valeur -->
 					<xsl:value-of select="."/>
 				</dc:contributor>
 			</xsl:for-each>
-
+<!-- MHV Feb 2020 : changement suite au retrait de dc.contributor.editor 
 			<xsl:for-each
 				select="$dc/doc:element[@name = 'contributor']/doc:element[@name != 'author' and @name != 'advisor']/doc:element/doc:field[@name = 'value']">
 				<dc:contributor>
@@ -162,6 +163,17 @@ je (MHV) vais standardiser une valeur -->
 					<xsl:value-of select="."/>
 				</dc:contributor>
 			</xsl:for-each>
+			
+			-->
+
+			<xsl:for-each
+				select="$dc/doc:element[@name = 'contributor']/doc:element[@name != 'author' and @name != 'advisor']/doc:element/doc:field[@name = 'value']">
+				<dc:contributor>
+					<xsl:value-of select="."/>
+				</dc:contributor>
+			</xsl:for-each>
+
+
 
 			<dc:date>
   			<xsl:value-of select="$laDate"/>
@@ -181,7 +193,21 @@ the resource. The string "Electronic Thesis or Dissertation" is recommended as o
 						<xsl:value-of select="'Thèse ou mémoire numérique'"	/>
 					</xsl:when>
 					<xsl:otherwise>
-						<xsl:value-of select="normalize-space(substring-before($dc/doc:element[@name = 'type']/doc:element/doc:field[@name = 'value']/text(), '/'))"	/>
+
+												<xsl:choose>
+												<xsl:when
+													test="contains('/', $dc/doc:element[@name = 'type']/doc:element/doc:field[@name = 'value']/text())">
+													<xsl:value-of
+														select="normalize-space(substring-before($dc/doc:element[@name = 'type']/doc:element/doc:field[@name = 'value']/text(), '/'))"
+													/>
+												</xsl:when>
+												<xsl:otherwise>
+													<xsl:value-of
+														select="normalize-space($dc/doc:element[@name = 'type']/doc:element/doc:field[@name = 'value']/text())"
+													/>
+												</xsl:otherwise>
+												</xsl:choose>
+
 					</xsl:otherwise>
 					</xsl:choose>
 				</dc:type>
@@ -195,7 +221,22 @@ the resource. The string "Electronic Thesis or Dissertation" is recommended as o
 						<xsl:value-of select="'Electronic Thesis or Dissertation'"	/>
 					</xsl:when>
 					<xsl:otherwise>
-						<xsl:value-of select="normalize-space(substring-after($dc/doc:element[@name = 'type']/doc:element/doc:field[@name = 'value']/text(), '/'))"	/>
+
+												<xsl:choose>
+												<xsl:when
+													test="contains('/', $dc/doc:element[@name = 'type']/doc:element/doc:field[@name = 'value']/text())">
+													<xsl:value-of
+														select="normalize-space(substring-after($dc/doc:element[@name = 'type']/doc:element/doc:field[@name = 'value']/text(), '/'))"
+													/>
+												</xsl:when>
+												<xsl:otherwise>
+													<xsl:value-of
+														select="normalize-space($dc/doc:element[@name = 'type']/doc:element/doc:field[@name = 'value']/text())"
+													/>
+												</xsl:otherwise>
+												</xsl:choose>
+
+
 					</xsl:otherwise>
 					</xsl:choose>
 				</dc:type>
